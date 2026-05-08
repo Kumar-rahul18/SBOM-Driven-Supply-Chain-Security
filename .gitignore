@@ -1,0 +1,17 @@
+# SBOM outputs
+sbom.cyclonedx.json
+sbom.spdx.json
+
+# Go binaries
+apps/sample-app/sample-app
+services/sbom-ingester/sbom-ingester
+services/admission-webhook/admission-webhook
+
+# Node / dashboard
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.env.local
+
+# Misc
+*.env
+.DS_Store

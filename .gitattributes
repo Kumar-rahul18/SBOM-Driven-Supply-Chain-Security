@@ -1,0 +1,12 @@
+# Normalize line endings: CRLF breaks shell scripts and Makefiles on Linux
+* text=auto
+
+# Force LF for files that run on Linux (CI, containers)
+*.sh         text eol=lf
+Makefile     text eol=lf
+Dockerfile   text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.go         text eol=lf
+*.mod        text eol=lf
+*.sum        text eol=lf
