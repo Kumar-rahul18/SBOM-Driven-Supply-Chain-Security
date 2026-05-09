@@ -107,6 +107,28 @@ jobs:
             sbom.cyclonedx.json
             sbom.spdx.json
 
+      # Optional: post SBOM to the ingestion service.
+      # Set the INGEST_URL repository variable (Settings → Variables) to enable.
+      # Example: https://your-server:8080  or an ngrok URL for local dev.
+      - name: Post SBOM to ingestion service
+        if: vars.INGEST_URL != ''
+        run: |
+          curl -sf -X POST "${{ vars.INGEST_URL }}/ingest" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+                  --arg name   "${{ steps.image.outputs.name }}" \
+                  --arg tag    "${{ github.ref_name }}" \
+                  --arg digest "${{ steps.build-push.outputs.digest }}" \
+                  --slurpfile sbom sbom.cyclonedx.json \
+                  '{
+                    image_name:   $name,
+                    image_tag:    $tag,
+                    image_digest: $digest,
+                    registry:     "ghcr.io",
+                    signed:       true,
+                    sbom:         $sbom[0]
+                  }')"
+
       - name: Write job summary
         run: |
           DIGEST="${{ steps.build-push.outputs.digest }}"

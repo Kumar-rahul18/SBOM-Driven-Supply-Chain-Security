@@ -62,6 +62,27 @@ verify: ## Verify signature + SBOM attestation (IMAGE_REF=... REPO=... make veri
 	@[ -n "$(REPO)" ]      || (echo "Usage: IMAGE_REF=<image>@<digest> REPO=org/repo make verify" && exit 1)
 	bash scripts/verify.sh $(IMAGE_REF) $(REPO)
 
+# ── Phase 2 — ingestion service ──────────────────────────────────────────────
+
+.PHONY: stack-up
+stack-up: ## Start Postgres + sbom-ingester via Docker Compose
+	docker compose up --build -d
+	@echo "Ingester: http://localhost:8080/health"
+
+.PHONY: stack-down
+stack-down: ## Stop and remove Docker Compose stack
+	docker compose down -v
+
+.PHONY: stack-logs
+stack-logs: ## Tail ingestion service logs
+	docker compose logs -f sbom-ingester
+
+.PHONY: ingest
+ingest: ## Ingest a local SBOM (SBOM=sbom.cyclonedx.json DIGEST=sha256:... NAME=... make ingest)
+	@[ -n "$(SBOM)"   ] || (echo "Usage: SBOM=<file> DIGEST=<sha256:...> NAME=<image> make ingest" && exit 1)
+	@[ -n "$(DIGEST)" ] || (echo "Usage: SBOM=<file> DIGEST=<sha256:...> NAME=<image> make ingest" && exit 1)
+	bash scripts/ingest-sbom.sh $(SBOM) $(DIGEST) $(NAME) $(TAG)
+
 # ── Tools installation check ─────────────────────────────────────────────────
 
 .PHONY: check-tools
